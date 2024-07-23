@@ -22,6 +22,7 @@ if __name__ == "__main__":
     chain = PromptTemplate.from_template(template=query) | llm
 
     res = chain.invoke({"input": None})
+    print("\n\n---------------------------------")
     print(res)
 
     vectorstore = PineconeVectorStore(
@@ -37,4 +38,5 @@ if __name__ == "__main__":
     )
 
     result = retrieval_chain.invoke({"input": query})
+    print("\n\n---------------------------------")
     print(result)
