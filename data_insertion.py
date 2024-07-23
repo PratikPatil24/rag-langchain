@@ -20,7 +20,7 @@ if __name__ == "__main__":
     texts = text_splitter.split_documents(document)
     print(f"Created {len(texts)} chunks")
 
-    embeddings_model = OpenAIEmbeddings()
+    embeddings_model = OpenAIEmbeddings(model="text-embedding-3-large")
     PineconeVectorStore.from_documents(
         texts,
         embeddings_model,
