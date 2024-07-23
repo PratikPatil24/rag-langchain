@@ -7,9 +7,14 @@ from langchain_pinecone import PineconeVectorStore
 from langchain import hub
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
+from langchain_core.runnables import RunnablePassthrough
 
 
 load_dotenv()
+
+
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
 
 
 if __name__ == "__main__":
@@ -40,3 +45,31 @@ if __name__ == "__main__":
     result = retrieval_chain.invoke({"input": query})
     print("\n\n---------------------------------")
     print(result)
+
+    # Retrieval Implementation with LCEL
+
+    template = """
+        Use the following pieces od context to answer the question at the end. If you don't know the answer, 
+        just say that you don't know, don't try to make an answer. Use three sentences maximum and keep the answer as concise as possible.
+        Always say "Thanks for asking!" at the end of the answer.
+        
+        {context}
+        
+        Question: {question}
+        Helpful Answer:
+    """
+
+    custom_rag_prompt = PromptTemplate(template=template)
+
+    rag_chain = (
+        {
+            "context": vectorstore.as_retriever() | format_docs,
+            "question": RunnablePassthrough(),
+        }
+        | custom_rag_prompt
+        | llm
+    )
+
+    response = rag_chain.invoke(query)
+    print("\n\n---------------------------------")
+    print(response)
